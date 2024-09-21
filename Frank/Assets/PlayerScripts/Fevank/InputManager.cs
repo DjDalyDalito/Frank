@@ -5,16 +5,25 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     PlayerControls playerControls;
+    PlayerLocomotion playerLocomotion;
     AnimatorManager animatorManager;
 
     public Vector2 movementInput;
-    private float moveAmount;
+    public Vector2 cameraInput;
+
+    public float cameraInputX;
+    public float cameraInputY;
+
+    public float moveAmount;
     public float verticalInput;
     public float horizontalInput;
+
+    public bool shift_Input;
 
     private void Awake()
     {
         animatorManager = GetComponent<AnimatorManager>();
+        playerLocomotion = GetComponent<PlayerLocomotion>();
     }
 
     private void OnEnable()
@@ -24,6 +33,10 @@ public class InputManager : MonoBehaviour
             playerControls = new PlayerControls();
 
             playerControls.PlayerMovement.Movement.performed += i => movementInput = i.ReadValue<Vector2>();
+            playerControls.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+
+            playerControls.PlayerActions.Shift.performed += i => shift_Input = true;
+            playerControls.PlayerActions.Shift.canceled += i => shift_Input = false;
         }
 
         playerControls.Enable();
@@ -37,13 +50,30 @@ public class InputManager : MonoBehaviour
     public void HandleAllInput()
     {
         HandleMovementInput();
+        HandleSprintingInput();
     }
 
     private void HandleMovementInput()
     {
         verticalInput = movementInput.y;
         horizontalInput = movementInput.x;
+
+        cameraInputY = cameraInput.y;
+        cameraInputX = cameraInput.x;
+        
         moveAmount = Mathf.Clamp01(Mathf.Abs(horizontalInput) + Mathf.Abs(verticalInput));
-        animatorManager.UpdateAnimatorValues(moveAmount, moveAmount);
+        animatorManager.UpdateAnimatorValues(0, moveAmount, playerLocomotion.isSprinting);
+    }
+
+    private void HandleSprintingInput()
+    {
+        if (shift_Input && moveAmount > 0.5f)
+        {
+            playerLocomotion.isSprinting = true;
+        }
+        else
+        {
+            playerLocomotion.isSprinting = false;
+        }
     }
 }
