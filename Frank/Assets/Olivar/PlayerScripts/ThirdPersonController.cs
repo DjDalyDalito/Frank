@@ -2,9 +2,11 @@ using UnityEngine;
 
 public class ThirdPersonController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 2f;
     public float rotationSpeed = 10f;
     public Camera playerCamera;
+    public KeyCode sprintKey = KeyCode.LeftShift;
+    public float sprintMultiplier = 2f;
 
     private Rigidbody rb;
     private Vector3 movement;
@@ -31,7 +33,15 @@ public class ThirdPersonController : MonoBehaviour
         {
             Vector3 moveDirection = playerCamera.transform.forward * inputDirection.z + playerCamera.transform.right * inputDirection.x;
             moveDirection.y = 0f;
-            rb.MovePosition(rb.position + moveDirection.normalized * moveSpeed * Time.deltaTime);
+
+            if (Input.GetKey(sprintKey))
+            {
+                rb.MovePosition(rb.position + moveDirection.normalized * moveSpeed * Time.deltaTime * sprintMultiplier);
+            }
+            else
+            {
+                rb.MovePosition(rb.position + moveDirection.normalized * moveSpeed * Time.deltaTime);
+            }
         }
     }
 
