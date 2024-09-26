@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AiLocomotion : MonoBehaviour
+public class AiFollowPlayer : MonoBehaviour
 {
     public Transform playerTransform;
     NavMeshAgent agent;
@@ -20,5 +20,4 @@ public class AiLocomotion : MonoBehaviour
         agent.destination = playerTransform.position;
         animator.SetFloat("Speed", agent.velocity.magnitude);
     }
-
 }
