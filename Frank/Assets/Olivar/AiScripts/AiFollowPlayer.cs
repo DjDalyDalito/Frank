@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,16 +8,17 @@ public class AiFollowPlayer : MonoBehaviour
 {
     public Transform playerTransform;
 
-    // Add variables for normal and maximum speeds
     public float normalSpeed;
     public float maxSpeed;
-
-    // Threshold to determine if the player is sprinting
     public float playerSprintSpeedThreshold;
+    private Vector3 lastPlayerPosition;
+
+    public float maxTime = 0.1f;
+    public float maxDistance = 1.0f;
 
     private NavMeshAgent agent;
     private Animator animator;
-    private Vector3 lastPlayerPosition;
+    float timer = 0.0f;
 
     void Start()
     {
@@ -27,8 +29,21 @@ public class AiFollowPlayer : MonoBehaviour
 
     void Update()
     {
-        agent.destination = playerTransform.position;
+        timer -= Time.deltaTime;
 
+        if(timer < 0.0f)
+        {
+            float sqrdistance = (playerTransform.position - agent.destination).sqrMagnitude;
+            if(sqrdistance > maxDistance*maxDistance)
+            {
+                agent.destination = playerTransform.position;
+            }
+            timer = maxTime;
+        }
+
+        animator.SetFloat("Speed", agent.velocity.magnitude);
+
+        //sätt en normal speed eller en max speed beroende på om spelaren springer eller inte
         Vector3 playerMovement = playerTransform.position - lastPlayerPosition;
         float playerSpeed = playerMovement.magnitude / Time.deltaTime;
         lastPlayerPosition = playerTransform.position;
@@ -43,7 +58,7 @@ public class AiFollowPlayer : MonoBehaviour
         {
             agent.speed = normalSpeed;
         }
+        //sätt en normal speed eller en max speed beroende på om spelaren springer eller inte
 
-        animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 }
